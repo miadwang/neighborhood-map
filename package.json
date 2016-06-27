@@ -1,0 +1,22 @@
+{
+  "name": "neighborhood-map",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miadwang/neighborhood-map.git"
+  },
+  "author": "Mia Wang <mia.d.wang@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/miadwang/neighborhood-map/issues"
+  },
+  "homepage": "https://github.com/miadwang/neighborhood-map#readme",
+  "devDependencies": {
+    "bower": "^1.7.9"
+  }
+}

@@ -1,0 +1,13 @@
+html,
+body {
+  height: 100%;
+}
+
+#map {
+  height: 100%;
+}
+
+#pano {
+  width: 200px;
+  height: 200px;
+}
