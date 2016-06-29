@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Neighborhood Map</title>
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="bower_components/normalize-css/normalize.css">
   <link rel="stylesheet" href="styles.css">
   <script src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -13,26 +14,27 @@
 <body>
   <h1>Neighborhood Map</h1>
   <div class="bar">
+    <p class="close-button" data-bind="click: closeMenu">Close X</p>
+
     <form>
       <label for="place-filter">Search</label>
       <input type="text" id="place-filter" data-bind="submit: search">
-      <!-- TODO: bind submit to search -->
-      <button type="button" id="filt" data-bind="click: search">Go</button>
+      <button type="button" id="filt" data-bind="click: function() {search(); closeMenu()}">Go</button>
     </form>
 
     <h2>My Favorate Places</h2>
     <ul data-bind="foreach: places">
-      <li data-bind="text: $data.name, click: $root.openInfoWindow.bind($data.id)"></li>
-      <!-- TODO: Is there a better solution? -->
+      <li data-bind="text: $data.name, click: $root.openInfoWindow.bind(this, $data.id)"></li>
     </ul>
   </div>
 
+  <p class="menu" data-bind="click: showMenu">&#9776;</p>
+
   <div id="map" class="map"></div>
 
-  <script src="js/map.js"></script>
   <script src="js/app.js"></script>
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?libraries=places,drawing,geometry&key=AIzaSyBMDXukZgtHx5J_58hiG-hsBHCac24qwG0&v=3&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBMDXukZgtHx5J_58hiG-hsBHCac24qwG0&v=3&callback=initMap">
   </script>
 </body>
 </html>
