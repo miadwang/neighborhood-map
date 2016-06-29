@@ -36,7 +36,8 @@ h1 {
 }
 
 form {
-  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom:  solid 1px white;
 }
 
 label {
@@ -55,17 +56,20 @@ button {
 }
 
 h2 {
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   font-size: 1.2em;
 }
 
 ul {
   text-align: left;
   font-size: 0.8em;
+  line-height: 1.6;
+  padding-left: 25px;
+  padding-right: 10px;
 }
 
 li {
-  margin-bottom: 5px;
+  padding-bottom: 15px;
 }
 
 .menu {
@@ -98,6 +102,11 @@ li {
     height: calc(100% - 90px);
   }
 
+  form {
+    margin-top: 10px;
+    padding-bottom: 20px;
+  }
+
   h2 {
     font-size: 1.3em;
     margin-top: 30px;
@@ -106,6 +115,11 @@ li {
 
   ul {
     font-size: 0.9em;
+    padding-left: 30px;
+  }
+
+  li {
+    padding-bottom: 20px;
   }
 }
 
@@ -136,15 +150,17 @@ li {
   }
 
   form {
-    margin-top: 10px;
+    margin-top: 25px;
+    padding-bottom: 25px;
   }
 
   ul {
     font-size: 1em;
+    padding-left: 40px;
   }
 
   li {
-    margin-bottom: 10px;
+    padding-bottom: 25px;
   }
 
   .menu {
