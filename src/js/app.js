@@ -32,7 +32,8 @@ var ViewModel = function() {
 
     //If no places match, alert user.
     if (self.places().length === 0) {
-      window.alert('No result!');
+      window.alert('Sorry, we cannot find any matching places. Please try again.');
+      self.recovery();
     } else {
       map.fitBounds(bounds);
       self.closeInfoWindow();
@@ -88,8 +89,8 @@ var places = [], markers = [];
 //Init map, search for nearby restaurants, show list and markers.
 function init() {
   //Init map and bounds
-  var centerLatLng = new google.maps.LatLng(39.916558, 116.455651);
-  // var centerLatLng = new google.maps.LatLng(40.758895,-73.985131);
+  // var centerLatLng = new google.maps.LatLng(39.916558, 116.455651);
+  var centerLatLng = new google.maps.LatLng(40.758895,-73.985131);
 
   map = new google.maps.Map($('#map')[0], {
     center: centerLatLng,
@@ -107,6 +108,11 @@ function init() {
   infoWindow = new google.maps.InfoWindow({
     content: '',
     maxWidth: 200
+  });
+
+  infoWindow.addListener('closeclick', function() {
+    infoWindow.marker = null;
+    viewModel.hideBar();
   });
 
   //Init Google Map search service
@@ -173,33 +179,47 @@ function init() {
       }
       map.fitBounds(bounds);
     } else {
-      window.alert(results.status);
+      window.alert('Sorry, we cannot get place data from Google Map right now. Please try later.');
     }
   });
 }
 
 //Get and show details of a place.
 function showPlaceDetails(marker) {
-  var ginnerHTML = '', finnerHTML = '', innerHTML = '';
+  infoWindow.marker = marker;
+  infoWindow.setContent('');
+
+  var gInnerHTML = '', fInnerHTML = '', innerHTML = '';
+  var gFailHTML = '<br>strong>Sorry, we cannot get info from Google Map right now.</strong>';
+  var fFailHTML = '<br><strong>Sorry, we cannot get info form Foursqure right now.</strong>';
+
+  //Add content to info window
+  function showInfo() {
+    innerHTML = '<div class="Info" onclick="viewModel.hideBar()" style="text-align:left;line-height:1.5">' + gInnerHTML + fInnerHTML + '</div>';
+
+    if (infoWindow.marker === marker) {
+      infoWindow.setContent(innerHTML);
+
+      if (infoWindow.close) infoWindow.open(map, marker);
+    } else return;
+  }
 
   //Use Google Map service to search place details.
   googleService.getDetails({
     placeId: marker.id
   }, function(place, status) {
     if (status === google.maps.places.PlacesServiceStatus.OK) {
-      ginnerHTML = '<div class="Info" onclick="viewModel.hideBar()" style="text-align:left;line-height:1.5">';
-
       if (place.name) {
-        ginnerHTML += '<strong>' + place.name + '</strong>';
+        gInnerHTML += '<strong>' + place.name + '</strong>';
       }
       if (place.formatted_address) {
-        ginnerHTML += '<br>' + place.formatted_address;
+        gInnerHTML += '<br>' + place.formatted_address;
       }
       if (place.formatted_phone_number) {
-        ginnerHTML += '<br>' + place.formatted_phone_number;
+        gInnerHTML += '<br>' + place.formatted_phone_number;
       }
       if (place.opening_hours) {
-        ginnerHTML += '<br><br><strong>Hours:</strong><br>' +
+        gInnerHTML += '<br><br><strong>Hours:</strong><br>' +
         place.opening_hours.weekday_text[0] + '<br>' +
         place.opening_hours.weekday_text[1] + '<br>' +
         place.opening_hours.weekday_text[2] + '<br>' +
@@ -209,18 +229,19 @@ function showPlaceDetails(marker) {
         place.opening_hours.weekday_text[6];
       }
       if (place.photos) {
-        ginnerHTML += '<br><br><img src="' + place.photos[0].getUrl(
+        gInnerHTML += '<br><br><img src="' + place.photos[0].getUrl(
           {maxHeight: 100, maxWidth: 200}) + '">';
       }
-      ginnerHTML += '<div>' + place.geometry.location.lat() + ', ' + place.geometry.location.lng() + '</div>';
 
-      ginnerHTML += '</div>';
-      innerHTML = ginnerHTML + finnerHTML;
-
-      infoWindow.setContent(innerHTML);
+      if (place.geometry.vieport) {
+        bounds.union(place.geometry.viewport);
+      } else {
+        bounds.extend(place.geometry.location);
+      }
     } else {
-      window.alert('Cannot get Google info');
+      gInnerHTML = gFailHTML;
     }
+    showInfo();
   });
 
   //Use Foursqure API to search for place details
@@ -228,47 +249,48 @@ function showPlaceDetails(marker) {
 
   //Search for place
   $.getJSON(foursqureURL, function(data) {
-    var id = data.response.venues[0].id;
+    if (data.response.venues[0]) {
+      var id = data.response.venues[0].id;
 
-    //Search for place details
-    $.getJSON('https://api.foursquare.com/v2/venues/' + id + '?oauth_token=POC4ACUHUQK2TZC2MU01O5VMPCZ0B5JVN5UPGBMYCPDLE4HV&v=20160601', function(data) {
-      finnerHTML = '<br><div class="Info" onclick="viewModel.hideBar()" style="text-align:left;line-height:1.5"><strong>Likes and tips from Foursqure</strong>';
+      //Search for place details
+      $.getJSON('https://api.foursquare.com/v2/venues/' + id + '?oauth_token=POC4ACUHUQK2TZC2MU01O5VMPCZ0B5JVN5UPGBMYCPDLE4HV&v=20160601', function(data) {
+        fInnerHTML = '<br><br><strong>Info from Foursqure</strong>';
 
-      if (data.response.venue.likes) {
-        finnerHTML += '<br>Likes: ' + data.response.venue.likes.count;
-      }
-      if (data.response.venue.rating) {
-        finnerHTML += '<br>Rating: ' + data.response.venue.rating;
-      }
-      if (data.response.venue.price) {
-        finnerHTML += '<br>Price: ' + data.response.venue.price.message;
-      }
+        if (data.response.venue.likes) {
+          fInnerHTML += '<br>Likes: ' + data.response.venue.likes.count;
+        }
+        if (data.response.venue.rating) {
+          fInnerHTML += '<br>Rating: ' + data.response.venue.rating;
+        }
+        if (data.response.venue.price) {
+          fInnerHTML += '<br>Price: ' + data.response.venue.price.message;
+        }
 
-      if (data.response.venue.tips.groups) {
-        var n = data.response.venue.tips.groups.length - 1;
-      }
-      if (data.response.venue.tips.groups[n].items[0]) {
-        finnerHTML += '<br>Tips:<br> - ' + data.response.venue.tips.groups[n].items[0].text;
-      }
-      if (data.response.venue.tips.groups[n].items[1]) {
-        finnerHTML += '<br> - ' + data.response.venue.tips.groups[n].items[1].text;
-      }
-      if (data.response.venue.tips.groups[n].items[2]) {
-        finnerHTML += '<br> - ' + data.response.venue.tips.groups[n].items[2].text;
-      }
+        if (data.response.venue.tips.groups) {
+          var n = data.response.venue.tips.groups.length - 1;
+        }
+        if (data.response.venue.tips.groups[n].items[0]) {
+          fInnerHTML += '<br>Tips:<br> - ' + data.response.venue.tips.groups[n].items[0].text;
+        }
+        if (data.response.venue.tips.groups[n].items[1]) {
+          fInnerHTML += '<br> - ' + data.response.venue.tips.groups[n].items[1].text;
+        }
+        if (data.response.venue.tips.groups[n].items[2]) {
+          fInnerHTML += '<br> - ' + data.response.venue.tips.groups[n].items[2].text;
+        }
 
-      finnerHTML += '</div>';
-      innerHTML = ginnerHTML + finnerHTML;
+      }).fail(function() {
+        fInnerHTML = fFailHTML;
 
-      infoWindow.setContent(innerHTML);
-    });
-  });
-
-  infoWindow.marker = marker;
-  infoWindow.open(map, marker);
-
-  infoWindow.addListener('closeclick', function() {
-    infoWindow.marker = null;
-    viewModel.hideBar();
+      }).always(function() {
+        showInfo();
+      });
+    } else {
+      fInnerHTML = fFailHTML;
+      showInfo();
+    }
+  }).fail(function() {
+    fInnerHTML = fFailHTML;
+    showInfo();
   });
 }
