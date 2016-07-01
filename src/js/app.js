@@ -57,7 +57,7 @@ var ViewModel = function() {
   this.openInfoWindow = function(data) {
     for (var i = 0, len = markers.length; i < len; i++) {
       if (data.id === markers[i].id) {
-        showPlaceDetails(markers[i]);
+        triggerMarkerClick (markers[i]);
       }
     }
   };
@@ -149,19 +149,16 @@ function init() {
         });
 
         marker.addListener('click', function() {
+          this.setAnimation(google.maps.Animation.BOUNCE);
+          setTimeout(function () {
+            this.setAnimation(null);
+          }.bind(this), 1400);
+
           viewModel.hideBar();
 
           if (infoWindow.marker != this) {
             showPlaceDetails(this);
           }
-        });
-
-        marker.addListener('mouseover', function() {
-          this.setAnimation(google.maps.Animation.BOUNCE);
-        });
-
-        marker.addListener('mouseout', function() {
-          this.setAnimation(null);
         });
 
         markers.push(marker);
@@ -182,6 +179,11 @@ function init() {
       window.alert('Sorry, we cannot get place data from Google Map right now. Please try later.');
     }
   });
+}
+
+//Trigger a marker click event when a list item is clicked to show animation and place details.
+function triggerMarkerClick(marker) {
+  google.maps.event.trigger(marker, 'click');
 }
 
 //Get and show details of a place.

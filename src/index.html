@@ -27,7 +27,7 @@
 
     <h2>My Favorate Places</h2>
     <ul data-bind="foreach: places">
-      <li data-bind="text: $data.name, click: function() {$root.openInfoWindow($data); $root.hideBar();}"></li>
+      <li data-bind="text: $data.name, click: $root.openInfoWindow"></li>
     </ul>
   </div>
 
