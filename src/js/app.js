@@ -1,5 +1,10 @@
 'use strict';
 
+require('normalize.css');
+require('../styles.css');
+var $ = require('jquery');
+var ko = require('knockout');
+
 var ViewModel = function() {
   var self = this;
 
@@ -87,7 +92,7 @@ var map, bounds, infoWindow, googleService;
 var places = [], markers = [];
 
 //Init map, search for nearby restaurants, show list and markers.
-function init() {
+window.init = function() {
   //Init map and bounds
   // var centerLatLng = new google.maps.LatLng(39.916558, 116.455651);
   var centerLatLng = new google.maps.LatLng(40.758895,-73.985131);
