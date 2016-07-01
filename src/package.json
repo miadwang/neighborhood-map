@@ -16,7 +16,9 @@
     "url": "https://github.com/miadwang/neighborhood-map/issues"
   },
   "homepage": "https://github.com/miadwang/neighborhood-map#readme",
-  "devDependencies": {
-    "bower": "^1.7.9"
+  "dependencies": {
+    "jquery": "^3.0.0",
+    "knockout": "^3.4.0",
+    "normalize.css": "^4.2.0"
   }
 }
