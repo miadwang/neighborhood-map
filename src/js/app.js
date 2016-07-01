@@ -1,5 +1,10 @@
 'use strict';
 
+require('normalize.css');
+require('../styles.css');
+var $ = require('jquery');
+var ko = require('knockout');
+
 var ViewModel = function() {
   var self = this;
 
@@ -57,7 +62,7 @@ var ViewModel = function() {
   this.openInfoWindow = function(data) {
     for (var i = 0, len = markers.length; i < len; i++) {
       if (data.id === markers[i].id) {
-        showPlaceDetails(markers[i]);
+        triggerMarkerClick (markers[i]);
       }
     }
   };
@@ -87,7 +92,7 @@ var map, bounds, infoWindow, googleService;
 var places = [], markers = [];
 
 //Init map, search for nearby restaurants, show list and markers.
-function init() {
+window.init = function() {
   //Init map and bounds
   // var centerLatLng = new google.maps.LatLng(39.916558, 116.455651);
   var centerLatLng = new google.maps.LatLng(40.758895,-73.985131);
@@ -111,7 +116,7 @@ function init() {
   });
 
   infoWindow.addListener('closeclick', function() {
-    infoWindow.marker = null;
+    viewModel.closeInfoWindow(); //Close info window of the last marker
     viewModel.hideBar();
   });
 
@@ -149,19 +154,16 @@ function init() {
         });
 
         marker.addListener('click', function() {
+          this.setAnimation(google.maps.Animation.BOUNCE);
+          setTimeout(function () {
+            this.setAnimation(null);
+          }.bind(this), 1400);
+
           viewModel.hideBar();
 
           if (infoWindow.marker != this) {
             showPlaceDetails(this);
           }
-        });
-
-        marker.addListener('mouseover', function() {
-          this.setAnimation(google.maps.Animation.BOUNCE);
-        });
-
-        marker.addListener('mouseout', function() {
-          this.setAnimation(null);
         });
 
         markers.push(marker);
@@ -184,10 +186,14 @@ function init() {
   });
 }
 
+//Trigger a marker click event when a list item is clicked to show animation and place details.
+function triggerMarkerClick(marker) {
+  google.maps.event.trigger(marker, 'click');
+}
+
 //Get and show details of a place.
 function showPlaceDetails(marker) {
   infoWindow.marker = marker;
-  infoWindow.setContent('');
 
   var gInnerHTML = '', fInnerHTML = '', innerHTML = '';
   var gFailHTML = '<br>strong>Sorry, we cannot get info from Google Map right now.</strong>';
