@@ -15,7 +15,7 @@ This project uses Google Map and Foursqure APIs.
 
 ## Build Process
 
-This project uses Webpack to build for production.
+This project uses Gulp and Webpack to build for production.
 
 ### Install dependencies
 
@@ -23,10 +23,9 @@ This project uses Webpack to build for production.
 
 Run `npm install`
 
-### Build with Webpack
+### Build with gulp and webpack
 
-Run `webpack` to build `bundle.js` in `dist/` 
-
+Run `gulp` to build `index.html` and `bundle.js` in `dist/`
 
 ## License
 
