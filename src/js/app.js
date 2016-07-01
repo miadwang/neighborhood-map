@@ -84,11 +84,11 @@ var ViewModel = function() {
   };
 };
 
-var viewModel = new ViewModel();
+window.viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 //Global variables.
-var map, bounds, infoWindow, googleService;
+var map, bounds, infoWindow, info, googleService;
 var places = [], markers = [];
 
 //Init map, search for nearby restaurants, show list and markers.
@@ -114,6 +114,10 @@ window.init = function() {
     content: '',
     maxWidth: 200
   });
+
+  info = document.createElement('div');
+  $(info).addClass('info');
+  $(info).click(viewModel.hideBar);
 
   infoWindow.addListener('closeclick', function() {
     viewModel.closeInfoWindow(); //Close info window of the last marker
@@ -184,7 +188,7 @@ window.init = function() {
       window.alert('Sorry, we cannot get place data from Google Map right now. Please try later.');
     }
   });
-}
+};
 
 //Trigger a marker click event when a list item is clicked to show animation and place details.
 function triggerMarkerClick(marker) {
@@ -195,16 +199,16 @@ function triggerMarkerClick(marker) {
 function showPlaceDetails(marker) {
   infoWindow.marker = marker;
 
-  var gInnerHTML = '', fInnerHTML = '', innerHTML = '';
+  var gInnerHTML = '', fInnerHTML = '';
   var gFailHTML = '<br>strong>Sorry, we cannot get info from Google Map right now.</strong>';
   var fFailHTML = '<br><strong>Sorry, we cannot get info form Foursqure right now.</strong>';
 
   //Add content to info window
   function showInfo() {
-    innerHTML = '<div class="Info" onclick="viewModel.hideBar()" style="text-align:left;line-height:1.5">' + gInnerHTML + fInnerHTML + '</div>';
+    info.innerHTML = gInnerHTML + fInnerHTML;
 
     if (infoWindow.marker === marker) {
-      infoWindow.setContent(innerHTML);
+      infoWindow.setContent(info);
 
       if (infoWindow.close) infoWindow.open(map, marker);
     } else return;
