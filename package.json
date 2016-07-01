@@ -20,5 +20,8 @@
     "jquery": "^3.0.0",
     "knockout": "^3.4.0",
     "normalize.css": "^4.2.0"
+  },
+  "devDependencies": {
+    "webpack": "^1.13.1"
   }
 }
