@@ -5,36 +5,48 @@
   <title>Neighborhood Map</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="bower_components/normalize-css/normalize.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="node_modules/normalize.css/normalize.css">
   <link rel="stylesheet" href="styles.css">
-  <script src="bower_components/jquery/dist/jquery.min.js"></script>
-  <script src="bower_components/knockout/dist/knockout.js"></script>
+  <script src="node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="node_modules/knockout/build/output/knockout-latest.js"></script>
 </head>
 
 <body>
   <h1>Neighborhood Map</h1>
   <div class="bar">
-    <p class="close-button" data-bind="click: closeMenu">Close X</p>
+    <p class="close-button" data-bind="click: hideBar">Close X</p>
 
-    <form>
+    <form data-bind="submit: search">
       <label for="place-filter">Search</label>
-      <input type="text" id="place-filter" data-bind="submit: search">
-      <button type="button" data-bind="click: function() {search(); closeMenu()}">Go</button>
+      <input type="text" id="place-filter" data-bind="textInput: searchString">
+      <button type="submit">Go</button>
     </form>
 
     <h2>My Favorate Places</h2>
     <ul data-bind="foreach: places">
-      <li data-bind="text: $data.name, click: $root.openInfoWindow.bind(this, $data.id)"></li>
+      <li data-bind="text: $data.name, click: function() {$root.openInfoWindow($data); $root.hideBar();}"></li>
     </ul>
   </div>
 
-  <p class="menu" data-bind="click: showMenu">&#9776;</p>
+  <p class="menu" data-bind="click: showBar">&#9776;</p>
+
+  <p class="recovery-button" data-bind="click: recovery">Show All Places</p>
 
   <div id="map" class="map"></div>
 
   <script src="js/app.js"></script>
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBMDXukZgtHx5J_58hiG-hsBHCac24qwG0&v=3&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBMDXukZgtHx5J_58hiG-hsBHCac24qwG0&v=3&callback=init&language=en&region=US">
+  </script>
+  <script>
+    setTimeout(function() {
+      if (map === undefined) {
+        window.alert('Sorry, we cannot init Google Map right now. Please try later.')
+      }
+    }, 10000);
   </script>
 </body>
 </html>

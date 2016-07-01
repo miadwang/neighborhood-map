@@ -1,3 +1,7 @@
+/** {
+  border: solid 1px red;
+}*/
+
 html,
 body {
   height: 100%;
@@ -19,11 +23,15 @@ h1 {
   width: 250px;
   margin-left: 10px;
   position: absolute;
-  transform: translateX(-260px);
+  left: -260px;
   transition: transform 0.5s ease-in;
-  z-index: 15;
+  z-index: 2;
   height: calc(100% - 70px);
   overflow-y: scroll;
+}
+
+.show {
+  transform: translateX(260px);
 }
 
 .close-button {
@@ -80,8 +88,30 @@ li {
   display: inline-block;
   position: absolute;
   left: 10px;
-  z-index: 10;
+  z-index: 1;
   margin-top: 0;
+  opacity: 0.5;
+}
+
+.menu:hover {
+  opacity: 1;
+}
+
+.recovery-button {
+  color: white;
+  background-color: #34495e;
+  width: 140px;
+  padding: 8px;
+  display: inline-block;
+  position: absolute;
+  right: 10px;
+  margin-top: 0;
+  z-index: 1;
+  opacity: 0.5;
+}
+
+.recovery-button:hover {
+  opacity: 1;
 }
 
 .map {
@@ -135,8 +165,11 @@ li {
     margin-left: 2%;
     position: static;
     transform: none;
-    transition: none;
     height: calc(100% - 130px);
+  }
+
+  .show {
+    transform: none;
   }
 
   h2 {
@@ -165,6 +198,10 @@ li {
 
   .menu {
     display: none;
+  }
+
+  .recovery-button {
+    right: 2%;
   }
 
   .map {
