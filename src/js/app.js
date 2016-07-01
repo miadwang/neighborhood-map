@@ -111,7 +111,7 @@ function init() {
   });
 
   infoWindow.addListener('closeclick', function() {
-    infoWindow.marker = null;
+    viewModel.closeInfoWindow(); //Close info window of the last marker
     viewModel.hideBar();
   });
 
@@ -189,7 +189,6 @@ function triggerMarkerClick(marker) {
 //Get and show details of a place.
 function showPlaceDetails(marker) {
   infoWindow.marker = marker;
-  infoWindow.setContent('');
 
   var gInnerHTML = '', fInnerHTML = '', innerHTML = '';
   var gFailHTML = '<br>strong>Sorry, we cannot get info from Google Map right now.</strong>';
