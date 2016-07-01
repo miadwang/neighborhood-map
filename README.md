@@ -23,11 +23,10 @@ This project uses Webpack to build for production.
 
 Run `npm install`
 
-### build
+### Build with Webpack
 
-Run `webpack`
+Run `webpack` to build `bundle.js` in `dist/` 
 
----???
 
 ## License
 
