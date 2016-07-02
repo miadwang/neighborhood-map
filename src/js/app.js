@@ -5,6 +5,11 @@ require('../styles.css');
 var $ = require('jquery');
 var ko = require('knockout');
 
+//Global variables.
+var map, bounds, infoWindow, googleService;
+var places = [], markers = [];
+
+//ViewModel class.
 var ViewModel = function() {
   var self = this;
 
@@ -14,10 +19,18 @@ var ViewModel = function() {
   //Search string from user input.
   this.searchString = ko.observable('');
 
+  //This propery controls the appearance of the nav bar.
+  this.barAppearance = ko.observable(false);
+
+  //Handle map init error.
+  this.mapInitFail = function() {
+    window.alert('Sorry, we cannot init Google Map right now. Please try later.');
+  };
+
   //Hide all markers.
   this.hideMarkers = function() {
     for (var i = 0, len = markers.length; i < len; i++) {
-      markers[i].setMap(null);
+      markers[i].setVisible(false);
     }
   };
 
@@ -29,9 +42,9 @@ var ViewModel = function() {
 
     //If there are places matching the search query, update list and marker.
     for (var i = 0, len = places.length; i < len; i++) {
-      if (places[i].name.indexOf(self.searchString()) > -1) {
+      if (places[i].name.toLowerCase().indexOf(self.searchString().toLowerCase()) > -1) {
         self.places.push(places[i]);
-        markers[i].setMap(map);
+        markers[i].setVisible(true);
       }
     }
 
@@ -42,17 +55,19 @@ var ViewModel = function() {
     } else {
       map.fitBounds(bounds);
       self.closeInfoWindow();
+      infoWindow.marker = null;
     }
   };
 
   //Show all places.
   this.recovery = function() {
     this.closeInfoWindow();
+    infoWindow.marker = null;
     self.places([]);
 
     for (var i = 0, len = places.length; i < len; i++) {
       self.places.push(places[i]);
-      markers[i].setMap(map);
+      markers[i].setVisible(true);
     }
 
     map.fitBounds(bounds);
@@ -69,29 +84,26 @@ var ViewModel = function() {
 
   //Close info window.
   this.closeInfoWindow = function() {
-    infoWindow.marker = null;
     infoWindow.close();
   };
 
-  //Show left bar.
+  //Show nav bar.
   this.showBar = function() {
-    $('.bar').addClass('show');
+    self.barAppearance(true);
   };
 
-  //Hide left bar.
+  //Hide nav bar.
   this.hideBar = function() {
-    $('.bar').removeClass('show');
+    self.barAppearance(false);
   };
 };
 
 window.viewModel = new ViewModel();
-ko.applyBindings(viewModel);
 
-//Global variables.
-var map, bounds, infoWindow, info, googleService;
-var places = [], markers = [];
+//For live search
+viewModel.searchString.subscribe(viewModel.search);
 
-//Init map, search for nearby restaurants, show list and markers.
+//Init map, search for nearby restaurants, show list and markers, init ko bindings.
 window.init = function() {
   //Init map and bounds
   // var centerLatLng = new google.maps.LatLng(39.916558, 116.455651);
@@ -109,18 +121,19 @@ window.init = function() {
 
   bounds = new google.maps.LatLngBounds();
 
+  window.onresize = function() {
+    map.fitBounds(bounds);
+  };
+
   //Init infoWindow
   infoWindow = new google.maps.InfoWindow({
     content: '',
     maxWidth: 200
   });
 
-  info = document.createElement('div');
-  $(info).addClass('info');
-  $(info).click(viewModel.hideBar);
-
   infoWindow.addListener('closeclick', function() {
-    viewModel.closeInfoWindow(); //Close info window of the last marker
+    viewModel.closeInfoWindow();
+    infoWindow.marker = null;
     viewModel.hideBar();
   });
 
@@ -150,6 +163,7 @@ window.init = function() {
 
         var marker = new google.maps.Marker({
           map: map,
+          visible: true,
           icon: markerIcon,
           title: result.name,
           position: result.geometry.location,
@@ -158,16 +172,18 @@ window.init = function() {
         });
 
         marker.addListener('click', function() {
+          if (infoWindow.marker != this) {
+            viewModel.closeInfoWindow(); //Close info window of the last marker
+            showPlaceDetails(this);
+
+            map.setCenter(this.getPosition());
+          }
+
           this.setAnimation(google.maps.Animation.BOUNCE);
           setTimeout(function () {
             this.setAnimation(null);
           }.bind(this), 1400);
-
           viewModel.hideBar();
-
-          if (infoWindow.marker != this) {
-            showPlaceDetails(this);
-          }
         });
 
         markers.push(marker);
@@ -184,6 +200,9 @@ window.init = function() {
         viewModel.places.push(place);
       }
       map.fitBounds(bounds);
+
+      //Init ko bindings.
+      ko.applyBindings(viewModel);
     } else {
       window.alert('Sorry, we cannot get place data from Google Map right now. Please try later.');
     }
@@ -199,16 +218,16 @@ function triggerMarkerClick(marker) {
 function showPlaceDetails(marker) {
   infoWindow.marker = marker;
 
-  var gInnerHTML = '', fInnerHTML = '';
+  var gInnerHTML = '', fInnerHTML = '', innerHTML = '';
   var gFailHTML = '<br>strong>Sorry, we cannot get info from Google Map right now.</strong>';
-  var fFailHTML = '<br><strong>Sorry, we cannot get info form Foursqure right now.</strong>';
+  var fFailHTML = '<br><br><strong>Sorry, we cannot get info form Foursquare right now.</strong>';
 
   //Add content to info window
   function showInfo() {
-    info.innerHTML = gInnerHTML + fInnerHTML;
+    innerHTML = '<div class="Info" onclick="viewModel.hideBar()" style="text-align:left;line-height:1.5">' + gInnerHTML + fInnerHTML + '</div>';
 
     if (infoWindow.marker === marker) {
-      infoWindow.setContent(info);
+      infoWindow.setContent(innerHTML);
 
       if (infoWindow.close) infoWindow.open(map, marker);
     } else return;
@@ -243,28 +262,30 @@ function showPlaceDetails(marker) {
           {maxHeight: 100, maxWidth: 200}) + '">';
       }
 
-      if (place.geometry.vieport) {
+      if (place.geometry.viewport) {
         bounds.union(place.geometry.viewport);
       } else {
         bounds.extend(place.geometry.location);
       }
+
+      if (gInnerHTML === '') gInnerHTML = 'Sorry, no info from Google Map.';
     } else {
       gInnerHTML = gFailHTML;
     }
     showInfo();
   });
 
-  //Use Foursqure API to search for place details
-  var foursqureURL = 'https://api.foursquare.com/v2/venues/search?client_id=MBGFPAEKSQLE0ZTQ5AZCBLKZK4HHHDXE4PRFLOWQGCSI04GA&client_secret=2JTELLQFLOEQYH3V5PNKR2GDKUWEKEFP2HP2H4DXYFW0B55M&v=20160601&ll=' + marker.position.lat() + ',' + marker.position.lng() + '&query=' + marker.title + '&limit=1&categoryId=4d4b7105d754a06374d81259';
+  //Use Foursquare API to search for place details
+  var foursquareURL = 'https://api.foursquare.com/v2/venues/search?client_id=MBGFPAEKSQLE0ZTQ5AZCBLKZK4HHHDXE4PRFLOWQGCSI04GA&client_secret=2JTELLQFLOEQYH3V5PNKR2GDKUWEKEFP2HP2H4DXYFW0B55M&v=20160601&ll=' + marker.position.lat() + ',' + marker.position.lng() + '&query=' + marker.title + '&limit=1&categoryId=4d4b7105d754a06374d81259';
 
   //Search for place
-  $.getJSON(foursqureURL, function(data) {
+  $.getJSON(foursquareURL, function(data) {
     if (data.response.venues[0]) {
       var id = data.response.venues[0].id;
 
       //Search for place details
       $.getJSON('https://api.foursquare.com/v2/venues/' + id + '?oauth_token=POC4ACUHUQK2TZC2MU01O5VMPCZ0B5JVN5UPGBMYCPDLE4HV&v=20160601', function(data) {
-        fInnerHTML = '<br><br><strong>Info from Foursqure</strong>';
+        fInnerHTML = '<br><br><strong>Info from Foursquare</strong>';
 
         if (data.response.venue.likes) {
           fInnerHTML += '<br>Likes: ' + data.response.venue.likes.count;
@@ -288,6 +309,8 @@ function showPlaceDetails(marker) {
         if (data.response.venue.tips.groups[n].items[2]) {
           fInnerHTML += '<br> - ' + data.response.venue.tips.groups[n].items[2].text;
         }
+
+        if (fInnerHTML === '<br><br><strong>Info from Foursquare</strong>') fInnerHTML = 'Sorry, no info from Foursquare.';
 
       }).fail(function() {
         fInnerHTML = fFailHTML;

@@ -1,50 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <title>Neighborhood Map</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="shortcut icon" type="image/svg" href="img/logo.svg">
 </head>
 
 <body>
-  <h1>Neighborhood Map</h1>
-  <div class="bar">
-    <p class="close-button" data-bind="click: hideBar">Close X</p>
+  <header>
+    <h1>Neighborhood Map</h1>
+  </header>
 
-    <form data-bind="submit: search">
-      <label for="place-filter">Search</label>
-      <input type="text" id="place-filter" data-bind="textInput: searchString">
-      <button type="submit">Go</button>
-    </form>
+  <aside>
+    <div class="bar" data-bind="css: {show: barAppearance()}">
+      <p class="close-button" data-bind="click: hideBar">Close X</p>
 
-    <h2>My Favorate Places</h2>
-    <ul data-bind="foreach: places">
-      <li data-bind="text: $data.name, click: $root.openInfoWindow"></li>
-    </ul>
-  </div>
+      <form data-bind="submit: search">
+        <label for="place-filter">Search</label>
+        <input type="search" id="place-filter" data-bind="value: searchString, valueUpdate: 'keyup'" autocomplete="off">
+        <button type="submit">Go</button>
+      </form>
 
-  <p class="menu" data-bind="click: showBar">&#9776;</p>
+      <h2>My Favorate Places</h2>
+      <ul data-bind="foreach: places">
+        <li data-bind="text: $data.name, click: $root.openInfoWindow"></li>
+      </ul>
+    </div>
+  </aside>
 
-  <p class="recovery-button" data-bind="click: recovery">Show All Places</p>
+  <nav>
+    <p class="menu" data-bind="click: showBar">&#9776;</p>
 
-  <div id="map" class="map"></div>
+    <p class="recovery-button" data-bind="click: recovery">Show All Places</p>
+  </nav>
+
+  <main>
+    <div id="map" class="map"></div>
+  </main>
 
   <!-- build:js -->
   <script src="../dist/bundle.js"></script>
   <!-- endbuild -->
 
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBMDXukZgtHx5J_58hiG-hsBHCac24qwG0&v=3&callback=init&language=en&region=US">
-  </script>
-  <script>
-    setTimeout(function() {
-      if (map === undefined) {
-        window.alert('Sorry, we cannot init Google Map right now. Please try later.')
-      }
-    }, 10000);
+    src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBMDXukZgtHx5J_58hiG-hsBHCac24qwG0&v=3&callback=init&language=en&region=US" onerror="viewModel.mapInitFail()">
   </script>
 </body>
 </html>
