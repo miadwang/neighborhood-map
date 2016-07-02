@@ -11,6 +11,11 @@ h1 {
   color: white;
 }
 
+aside {
+  height: 100%;
+  float: left;
+}
+
 .bar {
   box-sizing: border-box;
   padding-top: 8px;
@@ -164,9 +169,13 @@ main {
     font-size: 2em;
   }
 
-  .bar {
+  aside {
     float: left;
     width: 25%;
+  }
+
+  .bar {
+    width: 100%;
     margin-left: 2%;
     position: static;
     transform: none;

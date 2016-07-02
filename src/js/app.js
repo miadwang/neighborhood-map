@@ -55,12 +55,14 @@ var ViewModel = function() {
     } else {
       map.fitBounds(bounds);
       self.closeInfoWindow();
+      infoWindow.marker = null;
     }
   };
 
   //Show all places.
   this.recovery = function() {
     this.closeInfoWindow();
+    infoWindow.marker = null;
     self.places([]);
 
     for (var i = 0, len = places.length; i < len; i++) {
@@ -82,7 +84,6 @@ var ViewModel = function() {
 
   //Close info window.
   this.closeInfoWindow = function() {
-    infoWindow.marker = null;
     infoWindow.close();
   };
 
@@ -131,7 +132,8 @@ window.init = function() {
   });
 
   infoWindow.addListener('closeclick', function() {
-    viewModel.closeInfoWindow(); //Close info window of the last marker
+    viewModel.closeInfoWindow();
+    infoWindow.marker = null;
     viewModel.hideBar();
   });
 
@@ -170,17 +172,18 @@ window.init = function() {
         });
 
         marker.addListener('click', function() {
-          map.setCenter(this.getPosition());
+          if (infoWindow.marker != this) {
+            viewModel.closeInfoWindow(); //Close info window of the last marker
+            showPlaceDetails(this);
+
+            map.setCenter(this.getPosition());
+          }
+
           this.setAnimation(google.maps.Animation.BOUNCE);
           setTimeout(function () {
             this.setAnimation(null);
           }.bind(this), 1400);
-
           viewModel.hideBar();
-
-          if (infoWindow.marker != this) {
-            showPlaceDetails(this);
-          }
         });
 
         markers.push(marker);
