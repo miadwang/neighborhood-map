@@ -22,12 +22,14 @@
     "normalize.css": "^4.2.0"
   },
   "devDependencies": {
+    "css-loader": "^0.23.1",
     "gulp": "^3.9.1",
     "gulp-html-replace": "^1.6.1",
     "gulp-htmlmin": "^2.0.0",
     "gulp-minify-inline": "^0.2.1",
     "gulp-rename": "^1.2.2",
     "gulp-util": "^3.0.7",
+    "style-loader": "^0.13.1",
     "webpack": "^1.13.1"
   }
 }
